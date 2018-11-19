@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker stop shikanle-tcp-tunnel-1
+docker stop shikanle-tcp-tunnel-2

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker run --name shikanle-tcp-tunnel-1 -p 80:80 -p 7000:7000 -d --restart=always shikanle/tcp-tunnel
+docker run --name shikanle-tcp-tunnel-2 -p 8080:80 -p 7001:7000 -d --restart=always shikanle/tcp-tunnel
