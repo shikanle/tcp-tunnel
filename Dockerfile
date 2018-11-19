@@ -3,7 +3,7 @@ LABEL maintainer="Kanle Shi <shikanle@gmail.com>"
 ENV PROJECT_DIR /go/src/github.com/shikanle/tcp-tunnel
 ADD . ${PROJECT_DIR}
 WORKDIR ${PROJECT_DIR}
-RUN go build -o /go/bin/tcp-tunnel ${PROJECT_DIR}/main.go
+RUN go build -o /go/bin/tcp-tunnel .
 
 FROM iron/go
 LABEL maintainer="Kanle Shi <shikanle@gmail.com>"
