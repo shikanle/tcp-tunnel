@@ -1,7 +1,0 @@
-#!/bin/bash
-
-docker stop shikanle-tcp-tunnel-1
-docker stop shikanle-tcp-tunnel-2
-
-docker rm shikanle-tcp-tunnel-1
-docker rm shikanle-tcp-tunnel-2

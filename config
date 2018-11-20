@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./build run 8080 18080 128
+./build run 8081 18081 4

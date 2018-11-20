@@ -9,6 +9,7 @@ FROM iron/go
 LABEL maintainer="Kanle Shi <shikanle@gmail.com>"
 ENV PUBLISH_PORT 80
 ENV TUNNEL_PORT 7000
+ENV POOL_SIZE 128
 COPY --from=0 /go/bin/tcp-tunnel /app/
 WORKDIR /app
-ENTRYPOINT ./tcp-tunnel -mode server -publish ${PUBLISH_PORT} -tunnel ${TUNNEL_PORT}
+ENTRYPOINT ./tcp-tunnel -mode server -publish ${PUBLISH_PORT} -tunnel ${TUNNEL_PORT} -pool ${POOL_SIZE}

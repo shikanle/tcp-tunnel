@@ -85,6 +85,12 @@ func (client *TcpTunnelClient) Serve() {
 			}
 			time.Sleep(time.Second)
 		}
+		tcpconn, ok := conn.(*net.TCPConn)
+		if ok {
+			tcpconn.SetKeepAlive(true)
+			tcpconn.SetKeepAlivePeriod(globalKeepAliveSeconds * time.Second)
+		}
+
 		if !connected {
 			log.Println("Reconnected to", client.serverUri)
 			connected = true
