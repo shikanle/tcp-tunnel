@@ -2,3 +2,4 @@ tcp-tunnel
 start-all
 stop-all
 uninstall-all
+.DS_Store
