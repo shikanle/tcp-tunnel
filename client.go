@@ -47,6 +47,7 @@ func (client *TcpTunnelClient) tunnelConnectionHandler(conn net.Conn) {
 			break
 		}
 		if local == nil {
+			log.Println("Visiting", client.localUri)
 			local, e = net.Dial("tcp", client.localUri)
 			if e != nil {
 				break
@@ -63,6 +64,8 @@ func (client *TcpTunnelClient) tunnelConnectionHandler(conn net.Conn) {
 		local.Close()
 	}
 	conn.Close()
+	log.Println("Visiting complete")
+
 	<-client.waitingConnections
 	log.Printf("[Pool = %d] Connection closed", len(client.waitingConnections))
 }
