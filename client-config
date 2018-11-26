@@ -1,0 +1,5 @@
+#!/bin/bash
+
+SERVER_IP=127.0.0.1
+
+./server run localhost:22 ${SERVER_IP}:10022 8

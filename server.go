@@ -45,7 +45,17 @@ func (server *TcpTunnelServer) serve(listenPort int, handler func(net.Conn)) {
 
 func (server *TcpTunnelServer) handleClientConnection(conn net.Conn) {
 	log.Printf("[Pool = %d] Visiting connection established", len(server.connnectionPool))
-	tunnel := <-server.connnectionPool
+
+	// the tunnel may be closed or timeout, choose one available
+	var tunnel net.Conn
+	for {
+		tunnel = <-server.connnectionPool
+		_, err := tunnel.Read(make([]byte, 0))
+		if err == nil {
+			break
+		}
+	}
+
 	go func() {
 		buf := make([]byte, globalDefaultBufferSize)
 		for {
@@ -81,8 +91,32 @@ func (server *TcpTunnelServer) handleClientConnection(conn net.Conn) {
 }
 
 func (server *TcpTunnelServer) handleTunnelConnection(conn net.Conn) {
-	server.connnectionPool <- conn
-	log.Printf("[Pool = %d] Connection established", len(server.connnectionPool))
+	log.Println("begin refresh")
+	for i := len(server.connnectionPool); i > 0; i-- {
+		tunnel := <-server.connnectionPool
+		_, err := tunnel.Read(make([]byte, 0))
+		log.Println("testing", err)
+		if err == nil {
+			log.Println("Good", tunnel, i)
+
+			tunnel.SetReadDeadline(time.Now().Add(time.Second))
+			_, e2 := tunnel.Read(make([]byte, 1))
+			log.Println(e2.Error())
+
+			server.connnectionPool <- tunnel
+		} else {
+			log.Println("Bad", tunnel, i)
+		}
+	}
+	log.Println("end refresh")
+
+	select {
+	case server.connnectionPool <- conn:
+		log.Printf("[Pool = %d] Connection established", len(server.connnectionPool))
+	default:
+		conn.Close()
+		log.Printf("[Pool = %d] Connection rejected, queue full", len(server.connnectionPool))
+	}
 }
 
 func (server *TcpTunnelServer) Serve() {

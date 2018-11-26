@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./server run 2222 10022 8

@@ -1,0 +1,144 @@
+#!/bin/bash
+
+DOCKER_IMAGE="shikanle/tcp-tunnel"
+DOCKER_CONTAINER="shikanle-tcp-tunnel"
+echo Docker Image = $DOCKER_IMAGE
+echo Docker Container = $DOCKER_CONTAINER
+
+clean() {
+  uninstall
+  if docker images | grep "$DOCKER_IMAGE" > /dev/null
+  then
+    echo "Removing docker image: $DOCKER_IMAGE"
+    docker rmi ${DOCKER_IMAGE}
+    echo "Docker image $DOCKER_IMAGE removed"
+  else
+    echo "Docker image not found: $DOCKER_IMAGE"
+  fi
+}
+
+build() {
+  if docker images | grep "$DOCKER_IMAGE" > /dev/null
+  then
+    clean
+    echo "Docker image detected: $DOCKER_IMAGE"
+  fi
+  echo "Building docker image: $DOCKER_IMAGE"
+  docker build -t ${DOCKER_IMAGE} .
+  echo "$DOCKER_IMAGE built"
+}
+
+run() {
+  CONTAINER_ID=$(docker run -p "$1":80 -p "$2":7000 -e MODE=server -e POOL_SIZE="$3" -d --restart=always $DOCKER_IMAGE)
+  echo docker start $CONTAINER_ID >> start-all
+  echo docker stop $CONTAINER_ID >> stop-all
+  echo docker rm $CONTAINER_ID >> uninstall-all
+}
+
+install() {
+  if docker images | grep "$DOCKER_IMAGE" > /dev/null
+  then
+    echo "Docker image detected: $DOCKER_IMAGE"
+  else
+    build
+  fi
+  if docker container list --all | grep "$DOCKER_IMAGE" > /dev/null
+  then
+    uninstall
+    echo "Docker container detected: $DOCKER_CONTAINER"
+  fi
+  echo "Installing docker container: $DOCKER_CONTAINER"
+  rm start-all
+  rm stop-all
+  rm uninstall-all
+  sh ./server-config
+  echo "$DOCKER_CONTAINER installed"
+}
+
+uninstall() {
+  stop
+  if docker container list --all | grep "$DOCKER_IMAGE" > /dev/null
+  then
+    echo "Uninstalling docker container: $DOCKER_CONTAINER"
+    sh ./uninstall-all
+    echo "$DOCKER_CONTAINER uninstalled"
+  else
+    echo "Docker container not exists: $DOCKER_CONTAINER"
+  fi
+}
+
+start() {
+  if docker container list | grep "$DOCKER_IMAGE" > /dev/null
+  then
+    echo "Docker container running: $DOCKER_CONTAINER"
+  else
+    if docker container list --all | grep "$DOCKER_IMAGE" > /dev/null
+    then
+      echo "Starting docker container: $DOCKER_CONTAINER"
+      sh ./start-all
+      echo "$DOCKER_CONTAINER started"
+    else
+      echo "Docker container not exists: $DOCKER_CONTAINER"
+    fi
+  fi
+}
+
+stop() {
+  if docker container list | grep "$DOCKER_IMAGE" > /dev/null
+  then
+    echo "Stopping docker image: $DOCKER_CONTAINER"
+    sh ./stop-all
+    echo "$DOCKER_CONTAINER stopped"
+  else
+    echo "Docker container already stopped: $DOCKER_CONTAINER"
+  fi
+}
+
+restart() {
+  stop
+  start
+}
+
+debug() {
+  if docker container list | grep "$DOCKER_CONTAINER" > /dev/null
+  then
+    uninstall
+    echo "Docker container detected: $DOCKER_CONTAINER"
+  fi
+  echo "Installing docker container: $DOCKER_CONTAINER"
+  docker run --name "${DOCKER_CONTAINER}" -p ${COLLECTOR_PORT}:9000 -p ${COLLECTOR_PORT}:9093 --rm -it $DOCKER_IMAGE
+  echo "$DOCKER_CONTAINER installed"
+}
+
+case "$1" in
+clean)
+  clean
+  ;;
+build)
+  build
+  ;;
+install)
+  install
+  ;;
+uninstall)
+  uninstall
+  ;;
+start)
+  start
+  ;;
+stop)
+  stop
+  ;;
+restart)
+  restart
+  ;;
+run)
+  run $2 $3 $4
+  ;;
+debug)
+  debug
+  ;;
+*)
+  echo "Usage: $0 {clean|build|install|uninstall|start|stop|restart|debug}"
+esac
+

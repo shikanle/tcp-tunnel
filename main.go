@@ -10,7 +10,7 @@ var (
 	argPublishPort = flag.Int("publish", 8080, "[Server] publish listening port, e.g., 6000")
 	argTunnelPort  = flag.Int("tunnel", 7000, "[Server] tunnel listening port, e.g., 7000")
 	argServerUri   = flag.String("server", "localhost:7000", "[Client] server host and port, e.g., localhost:7000")
-	argLocalUri    = flag.String("local", "13.232.248.187:3000", "[Client] local host and port, e.g., localhost:80")
+	argLocalUri    = flag.String("local", "13.232.248.187:18083", "[Client] local host and port, e.g., localhost:80")
 	argPoolSize    = flag.Int("pool", globalConnectionPoolSize, "[Server/Client] connection pool size, e.g., 16")
 )
 

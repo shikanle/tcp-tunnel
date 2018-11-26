@@ -29,7 +29,7 @@ build() {
 }
 
 run() {
-  CONTAINER_ID=$(docker run -p "$1":80 -p "$2":7000 -e POOL_SIZE="$3" -d --restart=always $DOCKER_IMAGE)
+  CONTAINER_ID=$(docker run -MODE=client -LOCAL_URI="$1" -e SERVER_URI="$2" -e POOL_SIZE="$3" -d --restart=always $DOCKER_IMAGE)
   echo docker start $CONTAINER_ID >> start-all
   echo docker stop $CONTAINER_ID >> stop-all
   echo docker rm $CONTAINER_ID >> uninstall-all
@@ -51,7 +51,7 @@ install() {
   rm start-all
   rm stop-all
   rm uninstall-all
-  sh ./config
+  sh ./client-config
   echo "$DOCKER_CONTAINER installed"
 }
 
